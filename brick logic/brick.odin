@@ -129,7 +129,7 @@ moveBrick :: proc(brick: ^BrickEx, env: ^Environment, speed: f32 = FALLING_SPEED
 			brick.gridY = i32(brick.position.y / f32(CELL_SIZE))
 		}
 		else {
-			fmt.println("Can't move down >:|")
+			// fmt.println("Can't move down >:|")
 			scoreGain = appendBrickToEnvironmentEx(env, brick^)
 			initNewBrick(brick, env^)
 		}

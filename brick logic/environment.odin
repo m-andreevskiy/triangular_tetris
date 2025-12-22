@@ -240,8 +240,6 @@ checkRows :: proc (env: Environment) -> i32 {
     }
   }
 
-  fmt.println("c rows: ", &COMPLETE_ROWS)
-
   return i32(f32(score) * getScoreMultiplier(lines))
 }
 

@@ -17,7 +17,7 @@ import bl "brick logic"
 */
 
 CELL_SIZE : i32 = 30
-NUMBER_OF_COLUMNS : i32 = 15
+NUMBER_OF_COLUMNS : i32 = 19
 NUMBER_OF_ROWS : i32 = 23 
 
 WINDOW_WIDTH : i32 = CELL_SIZE * NUMBER_OF_COLUMNS
@@ -25,6 +25,7 @@ WINDOW_HEIGHT : i32 = CELL_SIZE * NUMBER_OF_ROWS
 
 FALLING_SPEED : f32 = 20
 fallingSpeed : f32 = FALLING_SPEED
+MOVE_TIME : f32 = 0.1
 
 COMPLETE_ROW_TIME : f32 = 1.05 	// seconds
 HIGHLIGHT_TIME_MULTIPLIER : f32 = 4
@@ -80,10 +81,10 @@ getOffsetForNextBrick :: proc (type : bl.BrickType) -> bl.Vector2 {
 	cellSizeF := f32(CELL_SIZE)
 	#partial switch type {
 		case bl.BrickType.A, bl.BrickType.D, bl.BrickType.H, bl.BrickType.I:
-			return bl.Vector2{- cellSizeF / 4, 0}
+			return bl.Vector2{- cellSizeF / 2, 0}
 
 		case:
-			return bl.Vector2{cellSizeF / 2, cellSizeF / 2}
+			return bl.Vector2{cellSizeF / 4, cellSizeF / 2}
 	}
 }
 
@@ -91,7 +92,7 @@ getOffsetForNextBrick :: proc (type : bl.BrickType) -> bl.Vector2 {
 main :: proc() {
 	fmt.println("entered 'main'")
 
-	rl.InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Don't wanna mess with toilet paper")
+	rl.InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "TriaTris")
 	// if window wasn't created ...
 
 	defer rl.CloseWindow()
@@ -101,6 +102,7 @@ main :: proc() {
 
 	time : f32 = 0
 	timer : f32 = 0
+	moveTimer : f32 = 0
 
 	shader := rl.LoadShaderFromMemory(nil, bl.line_highlight_shader)
 	defer rl.UnloadShader(shader)
@@ -227,11 +229,13 @@ main :: proc() {
 				case rl.KeyboardKey.LEFT:
 					if (bl.canMoveBrick(currentBrick, environment, "left")){
 						currentBrick.gridX -= 1
+						moveTimer = 0
 					}
 	
 				case rl.KeyboardKey.RIGHT:
 					if (bl.canMoveBrick(currentBrick, environment, "right")){
 						currentBrick.gridX += 1
+						moveTimer = 0
 					}
 	
 				case rl.KeyboardKey.UP:
@@ -239,7 +243,7 @@ main :: proc() {
 						currentBrick.rotation = (currentBrick.rotation + 1) % 4
 					}
 					else{
-						fmt.println("can't rotate :(")
+						// fmt.println("can't rotate :(")
 					}
 				
 				case rl.KeyboardKey.R:
@@ -252,6 +256,26 @@ main :: proc() {
 		}
 
 		if currentBrick.isAlive {
+			if rl.IsKeyDown(rl.KeyboardKey.LEFT) {
+				if moveTimer > MOVE_TIME {
+					if (bl.canMoveBrick(currentBrick, environment, "left")){
+						currentBrick.gridX -= 1
+						moveTimer = 0
+					}
+				}
+				moveTimer += rl.GetFrameTime()
+			}
+
+			if rl.IsKeyDown(rl.KeyboardKey.RIGHT) {
+				if moveTimer > MOVE_TIME {
+					if (bl.canMoveBrick(currentBrick, environment, "right")){
+						currentBrick.gridX += 1
+						moveTimer = 0
+					}
+				}
+				moveTimer += rl.GetFrameTime()
+			}
+
 			if rl.IsKeyDown(rl.KeyboardKey.DOWN) {
 				fallingSpeed = 20 * FALLING_SPEED
 			}
